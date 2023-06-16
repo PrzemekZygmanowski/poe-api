@@ -1,0 +1,9 @@
+### Ask POE
+POST http://localhost:3000/operations HTTP/1.1
+Content-Type: application/json
+
+{
+"query": "string",
+  "type": "savse",
+  "category": "message"
+  }
