@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MessagesController } from './messages.controller';
+import { ShortcutsController } from './shortcuts.controller';
 
-describe('MessagesController', () => {
-  let controller: MessagesController;
+describe('ShortcutsController', () => {
+  let controller: ShortcutsController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MessagesController],
+      controllers: [ShortcutsController],
     }).compile();
 
-    controller = module.get<MessagesController>(MessagesController);
+    controller = module.get<ShortcutsController>(ShortcutsController);
   });
 
   it('should be defined', () => {
