@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Configuration, OpenAIApi } from 'openai';
+import { json } from 'stream/consumers';
 
 @Injectable()
 export class OpenaiService {
@@ -8,6 +9,7 @@ export class OpenaiService {
   constructor() {
     const configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
+      organization: process.env.OPENAI_ORGANIZATION,
     });
     this.openai = new OpenAIApi(configuration);
   }
@@ -20,13 +22,9 @@ export class OpenaiService {
 
     return embed;
   }
-
   async createChatCompletion(prompt, context, chatParams): Promise<any> {
-    const { model } = chatParams;
-    console.log(this.openai);
-
-    const completion = await this.openai.createCompletion({
-      model: model,
+    const body = {
+      model: chatParams.model,
       messages: [
         {
           role: 'system',
@@ -37,9 +35,12 @@ export class OpenaiService {
           content: prompt,
         },
       ],
-    });
-    console.log('asdasdad', completion);
+    };
+    console.log('body', body);
 
-    return completion;
+    const completion = await this.openai.createChatCompletion(body);
+    const response = completion.data.choices[0].message.content;
+
+    return response;
   }
 }

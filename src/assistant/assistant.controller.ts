@@ -7,7 +7,7 @@ export class AssistantController {
   constructor(private readonly openaiService: OpenaiService) {}
 
   @Post('')
-  askPoe(@Body() assistantQuery: AssistantDTO) {
+  async askPoe(@Body() assistantQuery: AssistantDTO) {
     if (assistantQuery.type !== ('save' || 'query' || 'forget' || 'remember')) {
       throw new HttpException(
         `Sorry, type ${assistantQuery.type} is incorrect. Try one of these: 'save', 'query', 'forget' or 'remember'.`,
@@ -21,11 +21,13 @@ export class AssistantController {
         404,
       );
     }
-    const response = this.openaiService.createChatCompletion(
+
+    const response = await this.openaiService.createChatCompletion(
       assistantQuery.query,
       assistantQuery.context,
       assistantQuery.chatParams,
     );
+
     return response;
   }
 }
