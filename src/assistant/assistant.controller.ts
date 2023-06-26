@@ -40,6 +40,9 @@ export class AssistantController {
     const response = await this.openaiService.createChatCompletion(
       responseArgs,
     );
+    const embed = await this.openaiService.createEmbedding(
+      assistantQuery.query,
+    );
 
     return response;
   }

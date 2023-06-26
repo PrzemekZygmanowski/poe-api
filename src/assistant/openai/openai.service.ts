@@ -13,10 +13,9 @@ export class OpenaiService {
     });
 
     this.openai = new OpenAIApi(configuration);
-    console.log(this.openai);
   }
 
-  async createEmbedding(prompt): Promise<any> {
+  async createEmbedding(prompt: string): Promise<any> {
     const { data: embed } = await this.openai.createEmbedding({
       input: prompt,
       model: 'text-embedding-ada-002',
