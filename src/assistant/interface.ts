@@ -11,3 +11,9 @@ export interface IAssistant {
   };
   context: string;
 }
+
+export interface IResponseArgs {
+  query: string;
+  context: string;
+  model: string;
+}

@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Configuration, OpenAIApi } from 'openai';
-import { json } from 'stream/consumers';
+import { IResponseArgs } from '../interface';
 
 @Injectable()
 export class OpenaiService {
@@ -11,7 +11,9 @@ export class OpenaiService {
       apiKey: process.env.OPENAI_API_KEY,
       organization: process.env.OPENAI_ORGANIZATION,
     });
+
     this.openai = new OpenAIApi(configuration);
+    console.log(this.openai);
   }
 
   async createEmbedding(prompt): Promise<any> {
@@ -22,9 +24,11 @@ export class OpenaiService {
 
     return embed;
   }
-  async createChatCompletion(prompt, context, chatParams): Promise<any> {
+  async createChatCompletion(responseArgs: IResponseArgs): Promise<any> {
+    const { query, context, model } = responseArgs;
+
     const body = {
-      model: chatParams.model,
+      model: model,
       messages: [
         {
           role: 'system',
@@ -32,14 +36,16 @@ export class OpenaiService {
         },
         {
           role: 'user',
-          content: prompt,
+          content: query,
         },
       ],
     };
-    console.log('body', body);
 
     const completion = await this.openai.createChatCompletion(body);
     const response = completion.data.choices[0].message.content;
+    if (!response) {
+      throw new HttpException(`Sorry, There is problem with connection`, 500);
+    }
 
     return response;
   }
