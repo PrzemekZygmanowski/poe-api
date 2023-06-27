@@ -7,10 +7,11 @@ import { OpenaiService } from './assistant/openai/openai.service';
 import { ConfigModule } from '@nestjs/config';
 import { PineconeService } from './assistant/pinecone/pinecone.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { ConversationService } from './assistant/conversation/conversation.service';
 
 @Module({
   imports: [ConfigModule.forRoot(), PrismaModule],
   controllers: [AppController, AssistantController, ShortcutsController],
-  providers: [OpenaiService, PineconeService],
+  providers: [OpenaiService, PineconeService, ConversationService],
 })
 export class AppModule {}
