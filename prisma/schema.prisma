@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output = "../node_modules/.prisma/client"
+  // output = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -19,11 +19,12 @@ model Resources {
   tags String
   category String
   synced Boolean
+  createdAt DateTime @default(now())
 }
 
 model Conversation {
   id    Int     @default(autoincrement()) @id
   question String
   answer String
-  diff Int
+  createdAt DateTime @default(now())
 }

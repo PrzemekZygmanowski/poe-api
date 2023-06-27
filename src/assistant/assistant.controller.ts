@@ -3,10 +3,14 @@ import { AssistantDTO } from './AssistantDTO';
 import { OpenaiService } from './openai/openai.service';
 import { IResponseArgs } from './interface';
 import { possibleCategory, possibleType } from '../helpers/variables';
+import { ConversationService } from './conversation/conversation.service';
 
 @Controller('assistant')
 export class AssistantController {
-  constructor(private readonly openaiService: OpenaiService) {}
+  constructor(
+    private readonly openaiService: OpenaiService,
+    private readonly conversationService: ConversationService,
+  ) {}
 
   @Post('')
   async askPoe(@Body() assistantQuery: AssistantDTO) {
@@ -40,8 +44,13 @@ export class AssistantController {
     const response = await this.openaiService.createChatCompletion(
       responseArgs,
     );
-    const embed = await this.openaiService.createEmbedding(
+    // const embed = await this.openaiService.createEmbedding(
+    //   assistantQuery.query,
+    // );
+
+    await this.conversationService.createConversation(
       assistantQuery.query,
+      response,
     );
 
     return response;
