@@ -7,6 +7,7 @@ export class ConversationService {
   constructor(private readonly prisma: PrismaService) {}
 
   async onModuleInit(): Promise<void> {
+    //https://docs.nestjs.com/techniques/task-scheduling
     await this.deleteRecordsOlderThan5Minutes();
     cron.schedule('*/5 * * * *', async () => {
       await this.deleteRecordsOlderThan5Minutes();
