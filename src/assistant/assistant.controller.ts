@@ -8,11 +8,10 @@ import { ConversationService } from './conversation/conversation.service';
 @Controller('assistant')
 export class AssistantController {
   constructor(
-    private readonly openaiService: OpenaiService,
-    private readonly conversationService: ConversationService,
+    private readonly openaiService: OpenaiService, // private readonly conversationService: ConversationService,
   ) {}
 
-  @Post('')
+  @Post()
   async askPoe(@Body() assistantQuery: AssistantDTO) {
     if (!assistantQuery.type || !assistantQuery.category) {
       throw new HttpException(
@@ -48,10 +47,10 @@ export class AssistantController {
     //   assistantQuery.query,
     // );
 
-    await this.conversationService.createConversation(
-      assistantQuery.query,
-      response,
-    );
+    // await this.conversationService.createConversation(
+    //   assistantQuery.query,
+    //   response,
+    // );
 
     return response;
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { Cron } from 'node-cron';
+import { PrismaService } from '../../prisma/prisma.service';
+import { cron } from 'node-cron';
 
 @Injectable()
 export class ConversationService {
@@ -8,7 +8,7 @@ export class ConversationService {
 
   async onModuleInit(): Promise<void> {
     await this.deleteRecordsOlderThan5Minutes();
-    Cron.schedule('*/5 * * * *', async () => {
+    cron.schedule('*/5 * * * *', async () => {
       await this.deleteRecordsOlderThan5Minutes();
     });
   }
