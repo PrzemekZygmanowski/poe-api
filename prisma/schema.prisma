@@ -15,7 +15,7 @@ model Resources {
   id    Int     @default(autoincrement()) @id
   title String
   description String
-  url String
+  url String?
   tags String
   category String
   synced Boolean

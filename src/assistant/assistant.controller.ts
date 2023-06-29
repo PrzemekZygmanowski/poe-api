@@ -8,7 +8,8 @@ import { ConversationService } from './conversation/conversation.service';
 @Controller('assistant')
 export class AssistantController {
   constructor(
-    private readonly openaiService: OpenaiService, // private readonly conversationService: ConversationService,
+    private readonly openaiService: OpenaiService,
+    private readonly conversationService: ConversationService,
   ) {}
 
   @Post()
@@ -43,15 +44,20 @@ export class AssistantController {
     const response = await this.openaiService.createChatCompletion(
       responseArgs,
     );
+    const parsedResponse = JSON.parse(response);
     // const embed = await this.openaiService.createEmbedding(
     //   assistantQuery.query,
     // );
 
-    // await this.conversationService.createConversation(
-    //   assistantQuery.query,
-    //   response,
-    // );
+    await this.conversationService.createConversation(
+      assistantQuery.query,
+      parsedResponse.answer,
+    );
 
-    return response;
+    if (!response) {
+      throw new HttpException(`Sorry, There is problem with connection`, 500);
+    }
+
+    return parsedResponse.answer;
   }
 }

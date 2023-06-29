@@ -17,3 +17,12 @@ export interface IResponseArgs {
   context: string;
   model: string;
 }
+
+export interface IResource {
+  title: string;
+  description: string;
+  url?: string;
+  tags: string;
+  category: Category;
+  synced: boolean;
+}

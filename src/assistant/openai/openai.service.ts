@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Configuration, OpenAIApi } from 'openai';
 import { IResponseArgs } from '../interface';
 
@@ -23,6 +23,7 @@ export class OpenaiService {
 
     return embed;
   }
+
   async createChatCompletion(responseArgs: IResponseArgs): Promise<any> {
     const { query, context, model } = responseArgs;
 
@@ -31,7 +32,9 @@ export class OpenaiService {
       messages: [
         {
           role: 'system',
-          content: `You are a helpful assistant named Poe (Personal Operating Entity). \n\n\nContext: "based on this context ${context} answer the question below as truthfully as you can"`,
+          content: `You are a helpful assistant named Poe (Personal Operating Entity). \n\n\nContext: "based on this context: ${context} answer the question below as truthfully as you can. \n\n\n
+          Additionally: \ncreate in a one sentence a title for your answer \nCreate 3-4 one word tags based on the question and answer. \n\n\nReturn response in JSON format with structure:
+          {title, answer, tags} \n\n\nReturn only JSON and nothing more.`,
         },
         {
           role: 'user',
@@ -42,9 +45,6 @@ export class OpenaiService {
 
     const completion = await this.openai.createChatCompletion(body);
     const response = completion.data.choices[0].message.content;
-    if (!response) {
-      throw new HttpException(`Sorry, There is problem with connection`, 500);
-    }
 
     return response;
   }
