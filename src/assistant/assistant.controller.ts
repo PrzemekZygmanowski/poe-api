@@ -4,12 +4,16 @@ import { OpenaiService } from './openai/openai.service';
 import { IResponseArgs } from './interface';
 import { possibleCategory, possibleType } from '../helpers/variables';
 import { ConversationService } from './conversation/conversation.service';
+import { PineconeService } from './pinecone/pinecone.service';
+import { MemoriesService } from './memories/memories.service';
 
 @Controller('assistant')
 export class AssistantController {
   constructor(
     private readonly openaiService: OpenaiService,
     private readonly conversationService: ConversationService,
+    private readonly pineconeService: PineconeService,
+    private readonly memoriesService: MemoriesService,
   ) {}
 
   @Post()
@@ -35,6 +39,21 @@ export class AssistantController {
       );
     }
 
+    const embed = await this.openaiService.createEmbedding(
+      assistantQuery.query,
+    );
+    const matches = await this.pineconeService.query(
+      embed.data[0].embedding,
+      10,
+      'category',
+      [assistantQuery.category],
+    );
+    const context = { memories: [] };
+    const memories = await this.memoriesService.findAllBy('id', matches);
+    context.memories = memories.map((memory) => memory.content);
+
+    console.log(context);
+
     const responseArgs: IResponseArgs = {
       query: assistantQuery.query,
       context: assistantQuery.context,
@@ -45,9 +64,6 @@ export class AssistantController {
       responseArgs,
     );
     const parsedResponse = JSON.parse(response);
-    // const embed = await this.openaiService.createEmbedding(
-    //   assistantQuery.query,
-    // );
 
     await this.conversationService.createConversation(
       assistantQuery.query,

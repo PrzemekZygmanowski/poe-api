@@ -13,11 +13,17 @@ export class PineconeService {
     });
   }
 
+  async upsert(vectors: number[]): Promise<any> {
+    return this.pinecone.upsert({
+      vectors: [vectors],
+    });
+  }
+
   async query(
     vector: number[],
     topK = 10,
     metadataKey: string,
-    metadataValue = ['data'],
+    metadataValue: string[],
   ) {
     const { matches } = await this.pinecone.query({
       vector,
