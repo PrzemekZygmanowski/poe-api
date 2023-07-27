@@ -1,4 +1,4 @@
-import { IsString, IsObject } from 'class-validator';
+import { IsString, IsObject, IsOptional } from 'class-validator';
 import { Category, Type } from './interface';
 
 class chatParamsDTO {
@@ -10,8 +10,9 @@ export class AssistantDTO {
   @IsString()
   query: string;
 
+  @IsOptional()
   @IsString()
-  type: Type;
+  type?: Type;
 
   @IsString()
   category: Category;

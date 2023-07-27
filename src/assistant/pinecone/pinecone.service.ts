@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PineconeClient } from 'pinecone-client';
 
 @Injectable()
 export class PineconeService {
   private pinecone;
+  private embeddings;
 
   constructor() {
     this.pinecone = new PineconeClient({
@@ -11,6 +13,15 @@ export class PineconeService {
       baseUrl: process.env.PINECONE_BASE_URL,
       namespace: process.env.PINECONE_NAMESPACE,
     });
+
+    this.embeddings = new OpenAIEmbeddings({
+      openAIApiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+
+  async createEmbedding(prompt: string): Promise<any> {
+    const embed = await this.embeddings.embedQuery(prompt);
+    return embed;
   }
 
   async upsert(vectors: number[]): Promise<any> {

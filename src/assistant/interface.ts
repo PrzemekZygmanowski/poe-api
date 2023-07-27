@@ -4,7 +4,7 @@ export type Category = 'message' | 'note';
 
 export interface IAssistant {
   query: string;
-  type: Type;
+  type?: Type;
   category: Category;
   chatParams: {
     model: string;
@@ -26,3 +26,5 @@ export interface IResource {
   category: Category;
   synced: boolean;
 }
+
+export type TType = Pick<IAssistant, 'type'>;

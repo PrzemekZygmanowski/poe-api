@@ -9,6 +9,8 @@ import { MemoriesService } from './memories/memories.service';
 
 @Controller('assistant')
 export class AssistantController {
+  private intention: any;
+
   constructor(
     private readonly openaiService: OpenaiService,
     private readonly conversationService: ConversationService,
@@ -18,18 +20,15 @@ export class AssistantController {
 
   @Post()
   async askPoe(@Body() assistantQuery: AssistantDTO) {
-    if (!assistantQuery.type || !assistantQuery.category) {
-      throw new HttpException(
-        `Sorry, no message type or category entered`,
-        404,
-      );
+    if (!assistantQuery.category) {
+      throw new HttpException(`Sorry, no message category entered`, 404);
     }
 
     if (!possibleType.includes(assistantQuery.type)) {
-      throw new HttpException(
-        `Sorry, type ${assistantQuery.type} is incorrect. Try one of these: 'save', 'query', 'forget' or 'remember'.`,
-        404,
+      const getIntention = await this.openaiService.describeIntention(
+        assistantQuery.query,
       );
+      this.intention = JSON.parse(getIntention);
     }
 
     if (!possibleCategory.includes(assistantQuery.category)) {
@@ -39,20 +38,17 @@ export class AssistantController {
       );
     }
 
-    const embed = await this.openaiService.createEmbedding(
+    const embed = await this.pineconeService.createEmbedding(
       assistantQuery.query,
     );
-    const matches = await this.pineconeService.query(
-      embed.data[0].embedding,
-      10,
-      'category',
-      [assistantQuery.category],
-    );
+
+    const matches = await this.pineconeService.query(embed, 10, 'category', [
+      assistantQuery.category,
+    ]);
+
     const context = { memories: [] };
     const memories = await this.memoriesService.findAllBy('id', matches);
     context.memories = memories.map((memory) => memory.content);
-
-    console.log(context);
 
     const responseArgs: IResponseArgs = {
       query: assistantQuery.query,
@@ -63,17 +59,16 @@ export class AssistantController {
     const response = await this.openaiService.createChatCompletion(
       responseArgs,
     );
-    const parsedResponse = JSON.parse(response);
 
-    await this.conversationService.createConversation(
-      assistantQuery.query,
-      parsedResponse.answer,
-    );
+    // await this.conversationService.createConversation(
+    //   assistantQuery.query,
+    //   response,
+    // );
 
     if (!response) {
       throw new HttpException(`Sorry, There is problem with connection`, 500);
     }
 
-    return parsedResponse.answer;
+    return response;
   }
 }
