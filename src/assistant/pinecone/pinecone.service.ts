@@ -24,9 +24,11 @@ export class PineconeService {
     return embed;
   }
 
-  async upsert(vectors: number[]): Promise<any> {
+  async upsert(id: number, vectors: number[]): Promise<any> {
+    console.log(vectors);
     return this.pinecone.upsert({
-      vectors: [vectors],
+      id,
+      vector: vectors,
     });
   }
 

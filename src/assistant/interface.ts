@@ -27,4 +27,10 @@ export interface IResource {
   synced: boolean;
 }
 
+export interface IMessageAnswer {
+  title: string;
+  answer: string;
+  tags: string;
+}
+
 export type TType = Pick<IAssistant, 'type'>;

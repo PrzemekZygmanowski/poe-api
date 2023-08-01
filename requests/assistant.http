@@ -3,7 +3,7 @@ POST http://localhost:3000/assistant HTTP/1.1
 Content-Type: application/json
 
 {
-    "query": "Hello, whats Your name?",
+    "query": "Hello, My name is Przemek, whats Your name?",
     "type": "query",
     "category": "message",
     "chatParams": {
@@ -31,12 +31,26 @@ POST http://localhost:3000/assistant HTTP/1.1
 Content-Type: application/json
 
 {
-    "query": "Hello, can you propose me button component?",
+    "query": "Hello, can you propose me red button component?",
     "type": "query",
     "category": "message",
     "chatParams": {
         "model": "gpt-3.5-turbo"
     },
     "context": "you are senior frontend developer with great knowledge of tailwindcss. recognize the intention of the question: component, advice, error. If the intent is a component, return only the component with the required styles based on tailwindcss. If intention is advice, answer as best you can. If the intention is an error, explain it and offer a solution."
+}
+
+### Ask POE about errors
+POST http://localhost:3000/assistant HTTP/1.1
+Content-Type: application/json
+
+{
+    "query": "Hello, i have problem with my angular app, here is a error: \n\n\n core.mjs:7635 ERROR Error: NG0900: Error trying to diff '[]'. Only arrays and iterables are allowed.\n\n\n can you help me?",
+    "type": "query",
+    "category": "message",
+    "chatParams": {
+        "model": "gpt-4"
+    },
+    "context": "you are senior frontend developer Acting like a rocket scientist investigating provided errors. Explain the provided error and offer a solution. if there's no error, return a message that everything is ok."
 }
 

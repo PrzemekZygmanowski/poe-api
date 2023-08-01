@@ -1,20 +1,24 @@
-import { Injectable } from '@nestjs/common';
-import { IResponseArgs } from '../interface';
+import { Injectable, Inject } from '@nestjs/common';
+import { IMessageAnswer, IResponseArgs } from '../interface';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanMessage } from 'langchain/schema';
-import { z } from 'zod';
 import {
   ChatPromptTemplate,
   HumanMessagePromptTemplate,
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 import { createStructuredOutputChainFromZod } from 'langchain/chains/openai_functions';
+import { messageCompletionSchema } from '../../helpers/answersSchema';
+import { MessageService } from '../message/message.service';
 
 @Injectable()
 export class OpenaiService {
   private assistant;
 
-  constructor() {
+  constructor(
+    @Inject(MessageService)
+    private readonly messageService: MessageService,
+  ) {
     this.assistant = new ChatOpenAI({
       temperature: 0.9,
       modelName: 'gpt-3.5-turbo',
@@ -34,16 +38,10 @@ export class OpenaiService {
     return intention.content;
   }
 
-  async createChatCompletion(responseArgs: IResponseArgs): Promise<any> {
+  async createChatCompletion(
+    responseArgs: IResponseArgs,
+  ): Promise<IMessageAnswer> {
     const { query, context, model } = responseArgs;
-
-    const zodSchema = z.object({
-      title: z
-        .string()
-        .describe('title based on the question and answer, in one sentence'),
-      answer: z.string().describe("answer to the user's question"),
-      tags: z.string().describe('3 or 4 tags based on the question and answer'),
-    });
 
     const conversation = new ChatOpenAI({
       temperature: 0.9,
@@ -61,18 +59,19 @@ export class OpenaiService {
       inputVariables: ['input', 'context'],
     });
 
-    const conversationChain = createStructuredOutputChainFromZod(zodSchema, {
-      prompt: chatPrompt,
-      llm: conversation,
-    });
+    const conversationChain = createStructuredOutputChainFromZod(
+      messageCompletionSchema,
+      {
+        prompt: chatPrompt,
+        llm: conversation,
+      },
+    );
 
     const response = await conversationChain.call({
       input: query,
       context: context,
     });
 
-    console.log(response);
-
-    return response;
+    return response.output;
   }
 }

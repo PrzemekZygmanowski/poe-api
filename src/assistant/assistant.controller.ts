@@ -1,11 +1,12 @@
 import { Body, Controller, HttpException, Post } from '@nestjs/common';
 import { AssistantDTO } from './AssistantDTO';
 import { OpenaiService } from './openai/openai.service';
-import { IResponseArgs } from './interface';
+import { IResource, IResponseArgs } from './interface';
 import { possibleCategory, possibleType } from '../helpers/variables';
 import { ConversationService } from './conversation/conversation.service';
 import { PineconeService } from './pinecone/pinecone.service';
 import { MemoriesService } from './memories/memories.service';
+import { MessageService } from './message/message.service';
 
 @Controller('assistant')
 export class AssistantController {
@@ -16,6 +17,7 @@ export class AssistantController {
     private readonly conversationService: ConversationService,
     private readonly pineconeService: PineconeService,
     private readonly memoriesService: MemoriesService,
+    private readonly messageService: MessageService,
   ) {}
 
   @Post()
@@ -42,13 +44,14 @@ export class AssistantController {
       assistantQuery.query,
     );
 
-    const matches = await this.pineconeService.query(embed, 10, 'category', [
-      assistantQuery.category,
-    ]);
+    // const matches = await this.pineconeService.query(embed, 10, 'category', [
+    //   assistantQuery.category,
+    // ]);
+    console.log(embed);
 
-    const context = { memories: [] };
-    const memories = await this.memoriesService.findAllBy('id', matches);
-    context.memories = memories.map((memory) => memory.content);
+    // const context = { memories: [] };
+    // const memories = await this.memoriesService.findAllBy('id', matches);
+    // context.memories = memories.map((memory) => memory.content);
 
     const responseArgs: IResponseArgs = {
       query: assistantQuery.query,
@@ -60,6 +63,16 @@ export class AssistantController {
       responseArgs,
     );
 
+    const data = await this.messageService.createMessageResource({
+      title: response.title,
+      description: response.answer,
+      url: '',
+      tags: response.tags,
+      category: assistantQuery.category,
+      synced: true,
+    });
+
+    await this.pineconeService.upsert(data.id, embed);
     // await this.conversationService.createConversation(
     //   assistantQuery.query,
     //   response,
