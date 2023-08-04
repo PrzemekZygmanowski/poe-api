@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PineconeClient } from 'pinecone-client';
+import { PineconeClient } from '@pinecone-database/pinecone';
+import { log } from 'console';
 
 @Injectable()
 export class PineconeService {
@@ -8,12 +9,7 @@ export class PineconeService {
   private embeddings;
 
   constructor() {
-    this.pinecone = new PineconeClient({
-      apiKey: process.env.PINECONE_API_KEY,
-      baseUrl: process.env.PINECONE_BASE_URL,
-      namespace: process.env.PINECONE_NAMESPACE,
-    });
-
+    this.pinecone = new PineconeClient();
     this.embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY,
     });
@@ -25,11 +21,21 @@ export class PineconeService {
   }
 
   async upsert(id: number, vectors: number[]): Promise<any> {
-    console.log(vectors);
-    return this.pinecone.upsert({
-      id,
-      vector: vectors,
+    await this.pinecone.init({
+      apiKey: process.env.PINECONE_API_KEY,
+      environment: process.env.PINECONE_ENVIRONMENT,
     });
+
+    const index = this.pinecone.Index(process.env.PINECONE_INDEX_NAME);
+
+    const upsertVectors = await index.upsert({
+      upsertRequest: {
+        vectors: [{ id: id.toString(), values: vectors }],
+        namespace: process.env.PINECONE_NAMESPACE,
+      },
+    });
+    console.log(upsertVectors);
+    return upsertVectors;
   }
 
   async query(
