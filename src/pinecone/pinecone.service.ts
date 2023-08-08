@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PineconeClient } from '@pinecone-database/pinecone';
-import { log } from 'console';
 
 @Injectable()
 export class PineconeService {
   private pinecone;
   private embeddings;
+  private pineconeIndex;
 
   constructor() {
     this.pinecone = new PineconeClient();
@@ -15,26 +15,36 @@ export class PineconeService {
     });
   }
 
+  async initPinecone() {
+    if (!this.pineconeIndex) {
+      await this.pinecone.init({
+        apiKey: process.env.PINECONE_API_KEY,
+        environment: process.env.PINECONE_ENVIRONMENT,
+      });
+      this.pineconeIndex = this.pinecone.Index(process.env.PINECONE_INDEX_NAME);
+    }
+  }
+
   async createEmbedding(prompt: string): Promise<any> {
     const embed = await this.embeddings.embedQuery(prompt);
     return embed;
   }
 
-  async upsert(id: number, vectors: number[]): Promise<any> {
-    await this.pinecone.init({
-      apiKey: process.env.PINECONE_API_KEY,
-      environment: process.env.PINECONE_ENVIRONMENT,
-    });
+  async upsert(id: number, vectors: number[], category: string): Promise<any> {
+    await this.initPinecone();
 
-    const index = this.pinecone.Index(process.env.PINECONE_INDEX_NAME);
-
-    const upsertVectors = await index.upsert({
+    const upsertVectors = await this.pineconeIndex.upsert({
       upsertRequest: {
-        vectors: [{ id: id.toString(), values: vectors }],
+        vectors: [
+          {
+            id: id.toString(),
+            values: vectors,
+            metadata: { category: category },
+          },
+        ],
         namespace: process.env.PINECONE_NAMESPACE,
       },
     });
-    console.log(upsertVectors);
     return upsertVectors;
   }
 
@@ -44,15 +54,18 @@ export class PineconeService {
     metadataKey: string,
     metadataValue: string[],
   ) {
-    const { matches } = await this.pinecone.query({
-      vector,
+    await this.initPinecone();
+
+    const queryRequest = {
       topK,
-      includeMetadata: true,
+      vector,
+      includeMetadata: false,
       includeValues: false,
-      filter: {
-        [metadataKey]: { ['$in']: metadataValue },
-      },
-    });
+      namespace: process.env.PINECONE_NAMESPACE,
+      filter: { [metadataKey]: { ['$in']: metadataValue } },
+    };
+
+    const { matches } = await this.pineconeIndex.query({ queryRequest });
 
     return matches
       .filter(

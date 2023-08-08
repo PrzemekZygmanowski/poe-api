@@ -1,12 +1,12 @@
 import { Body, Controller, HttpException, Post } from '@nestjs/common';
 import { AssistantDTO } from './AssistantDTO';
-import { OpenaiService } from './openai/openai.service';
 import { IResource, IResponseArgs } from './interface';
 import { possibleCategory, possibleType } from '../helpers/variables';
 import { ConversationService } from './conversation/conversation.service';
-import { PineconeService } from './pinecone/pinecone.service';
 import { MemoriesService } from './memories/memories.service';
 import { MessageService } from './message/message.service';
+import { OpenaiService } from '../openai/openai.service';
+import { PineconeService } from '../pinecone/pinecone.service';
 
 @Controller('assistant')
 export class AssistantController {
@@ -44,10 +44,11 @@ export class AssistantController {
       assistantQuery.query,
     );
 
-    // const matches = await this.pineconeService.query(embed, 10, 'category', [
-    //   assistantQuery.category,
-    // ]);
-    console.log(embed);
+    const matches = await this.pineconeService.query(embed, 10, 'category', [
+      assistantQuery.category,
+    ]);
+
+    console.log(matches);
 
     // const context = { memories: [] };
     // const memories = await this.memoriesService.findAllBy('id', matches);
@@ -72,7 +73,7 @@ export class AssistantController {
       synced: true,
     });
 
-    await this.pineconeService.upsert(data.id, embed);
+    await this.pineconeService.upsert(data.id, embed, assistantQuery.category);
     // await this.conversationService.createConversation(
     //   assistantQuery.query,
     //   response,

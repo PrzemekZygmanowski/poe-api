@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { IMessageAnswer, IResponseArgs } from '../interface';
+import { IMessageAnswer, IResponseArgs } from '../assistant/interface';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { HumanMessage } from 'langchain/schema';
 import {
@@ -8,17 +8,14 @@ import {
   SystemMessagePromptTemplate,
 } from 'langchain/prompts';
 import { createStructuredOutputChainFromZod } from 'langchain/chains/openai_functions';
-import { messageCompletionSchema } from '../../helpers/answersSchema';
-import { MessageService } from '../message/message.service';
+import { messageCompletionSchema } from '../helpers/answersSchema';
+// import { MessageService } from '../assistant/message/message.service';
 
 @Injectable()
 export class OpenaiService {
   private assistant;
 
-  constructor(
-    @Inject(MessageService)
-    private readonly messageService: MessageService,
-  ) {
+  constructor() {
     this.assistant = new ChatOpenAI({
       temperature: 0.9,
       modelName: 'gpt-3.5-turbo',
