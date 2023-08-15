@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PineconeClient } from '@pinecone-database/pinecone';
+import { MemoriesService } from '../assistant/memories/memories.service';
 
 @Injectable()
 export class PineconeService {
@@ -8,7 +9,7 @@ export class PineconeService {
   private embeddings;
   private pineconeIndex;
 
-  constructor() {
+  constructor(private readonly memoriesService: MemoriesService) {
     this.pinecone = new PineconeClient();
     this.embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY,
@@ -74,5 +75,15 @@ export class PineconeService {
           matches.reduce((acc, match) => acc + match.score, 0) / matches.length,
       )
       .map((match) => match.id);
+  }
+
+  async getContext(ids: string[]) {
+    const convertedIds = ids.map(Number);
+    console.log(convertedIds);
+
+    const context = { memories: [] };
+    const memories = await this.memoriesService.findAllBy('id', convertedIds);
+    context.memories = memories.map((memory) => memory.content);
+    return context;
   }
 }

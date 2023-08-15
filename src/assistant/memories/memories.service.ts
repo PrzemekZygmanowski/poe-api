@@ -14,7 +14,10 @@ export class MemoriesService {
     });
   }
 
-  async findAllBy(key: string, value: string | string[]): Promise<any> {
+  async findAllBy(
+    key: string,
+    value: string | string[] | number | number[],
+  ): Promise<any> {
     return await this.prisma.resources.findMany({
       where: { [key]: { in: value } },
     });

@@ -40,6 +40,20 @@ Content-Type: application/json
     "context": "you are senior frontend developer with great knowledge of tailwindcss. recognize the intention of the question: component, advice, error. If the intent is a component, return only the component with the required styles based on tailwindcss. If intention is advice, answer as best you can. If the intention is an error, explain it and offer a solution."
 }
 
+### Ask POE about correct english text
+POST http://localhost:3000/assistant HTTP/1.1
+Content-Type: application/json
+
+{
+    "query": "Hello, My name is Przemek, whats Your name?",
+    "type": "query",
+    "category": "message",
+    "chatParams": {
+        "model": "gpt-4"
+    },
+    "context": "Given an English text, your task is to correct any grammatical mistakes present. Make sure all sentences are in correct English grammar.'\n\nFor instance:\n\nIncorrect Text: 'She don't like apples.'\n\nCorrected Text: 'She doesn't like apples."
+}
+
 ### Ask POE about errors
 POST http://localhost:3000/assistant HTTP/1.1
 Content-Type: application/json
@@ -52,5 +66,19 @@ Content-Type: application/json
         "model": "gpt-4"
     },
     "context": "you are senior frontend developer Acting like a rocket scientist investigating provided errors. Explain the provided error and offer a solution. if there's no error, return a message that everything is ok."
+}
+
+### Ask POE about prompt
+POST http://localhost:3000/assistant HTTP/1.1
+Content-Type: application/json
+
+{
+    "query": "Hello, can you help me with prompt? i am trying to build prompt for app which is supposed to grammatically correct the delivered English text",
+    "type": "query",
+    "category": "message",
+    "chatParams": {
+        "model": "gpt-4"
+    },
+    "context": "You are prompt engineer with great knowledge about building prompts, OPEN AI Technology, and LLM. "
 }
 

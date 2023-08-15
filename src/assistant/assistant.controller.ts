@@ -48,7 +48,8 @@ export class AssistantController {
       assistantQuery.category,
     ]);
 
-    console.log(matches);
+    const memories = await this.pineconeService.getContext(matches);
+    console.log(memories);
 
     // const context = { memories: [] };
     // const memories = await this.memoriesService.findAllBy('id', matches);
