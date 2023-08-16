@@ -79,11 +79,9 @@ export class PineconeService {
 
   async getContext(ids: string[]) {
     const convertedIds = ids.map(Number);
-    console.log(convertedIds);
-
     const context = { memories: [] };
     const memories = await this.memoriesService.findAllBy('id', convertedIds);
-    context.memories = memories.map((memory) => memory.content);
+    context.memories = memories.map((memory) => memory.description);
     return context;
   }
 }
