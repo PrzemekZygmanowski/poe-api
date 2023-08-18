@@ -48,18 +48,22 @@ export class AssistantController {
       assistantQuery.category,
     ]);
 
-    const memories = await this.pineconeService.getContext(matches);
-    console.log(memories);
-
-    // const context = { memories: [] };
-    // const memories = await this.memoriesService.findAllBy('id', matches);
-    // context.memories = memories.map((memory) => memory.content);
+    const memories = await this.pineconeService.getMemories(matches);
 
     const responseArgs: IResponseArgs = {
       query: assistantQuery.query,
       context: assistantQuery.context,
       model: assistantQuery.chatParams.model,
+      memories: memories,
     };
+    if (assistantQuery.category === 'memory') {
+    }
+    if (assistantQuery.category === 'action') {
+    }
+    if (assistantQuery.category === 'note') {
+    }
+    if (assistantQuery.category === 'link') {
+    }
 
     const response = await this.openaiService.createChatCompletion(
       responseArgs,
@@ -75,10 +79,11 @@ export class AssistantController {
     });
 
     await this.pineconeService.upsert(data.id, embed, assistantQuery.category);
-    // await this.conversationService.createConversation(
-    //   assistantQuery.query,
-    //   response,
-    // );
+
+    await this.conversationService.createConversation(
+      assistantQuery.query,
+      response.answer,
+    );
 
     if (!response) {
       throw new HttpException(`Sorry, There is problem with connection`, 500);

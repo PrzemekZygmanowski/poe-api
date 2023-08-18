@@ -77,11 +77,11 @@ export class PineconeService {
       .map((match) => match.id);
   }
 
-  async getContext(ids: string[]) {
+  async getMemories(ids: string[]) {
     const convertedIds = ids.map(Number);
     const context = { memories: [] };
     const memories = await this.memoriesService.findAllBy('id', convertedIds);
     context.memories = memories.map((memory) => memory.description);
-    return context;
+    return context.memories;
   }
 }

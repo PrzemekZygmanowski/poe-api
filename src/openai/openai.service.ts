@@ -9,7 +9,6 @@ import {
 } from 'langchain/prompts';
 import { createStructuredOutputChainFromZod } from 'langchain/chains/openai_functions';
 import { messageCompletionSchema } from '../helpers/answersSchema';
-// import { MessageService } from '../assistant/message/message.service';
 
 @Injectable()
 export class OpenaiService {
@@ -38,7 +37,7 @@ export class OpenaiService {
   async createChatCompletion(
     responseArgs: IResponseArgs,
   ): Promise<IMessageAnswer> {
-    const { query, context, model } = responseArgs;
+    const { query, context, model, memories } = responseArgs;
 
     const conversation = new ChatOpenAI({
       temperature: 0.9,
@@ -49,7 +48,12 @@ export class OpenaiService {
     const chatPrompt = new ChatPromptTemplate({
       promptMessages: [
         SystemMessagePromptTemplate.fromTemplate(
-          `You are a helpful assistant named Poe (Personal Operating Entity). \n\n\nContext: "based on this context: {context} answer the question below as truthfully as you can.`,
+          `You are a helpful assistant named Poe (Personal Operating Entity). \n\n\nContext: "based on this context: {context} answer the question below as truthfully as you can.
+          ${
+            memories.length
+              ? `Answer using own memories '''${memories.join('\n\n\n')}'''`
+              : ''
+          }`,
         ),
         HumanMessagePromptTemplate.fromTemplate('{input}'),
       ],

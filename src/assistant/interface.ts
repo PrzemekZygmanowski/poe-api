@@ -1,6 +1,6 @@
 export type Type = 'save' | 'query' | 'forget' | 'remember';
 
-export type Category = 'message' | 'note';
+export type Category = 'message' | 'note' | 'memory' | 'link' | 'action';
 
 export interface IAssistant {
   query: string;
@@ -16,6 +16,7 @@ export interface IResponseArgs {
   query: string;
   context: string;
   model: string;
+  memories: string[];
 }
 
 export interface IResource {
@@ -32,5 +33,3 @@ export interface IMessageAnswer {
   answer: string;
   tags: string;
 }
-
-export type TType = Pick<IAssistant, 'type'>;
